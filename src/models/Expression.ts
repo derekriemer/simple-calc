@@ -14,7 +14,8 @@ export class Expression {
   }
 
   evaluate(prevResult: Expression) {
-    this.res = evaluate(this.expression, {
+    // ugly but mathjs mostly returns any. It can return int but often returns str. I'm gonna cast to string here and this could be a problem
+    this.res = ""+evaluate(this.expression, {
       _: prevResult.res
     })
   }
