@@ -1,52 +1,61 @@
 import { defineStore } from 'pinia'
-import { computed, reactive, ref } from 'vue'
+import { ref } from 'vue'
 import { Expression, unitExpr } from '../models/Expression'
 
 export const useExpressionsStore = defineStore('expressions', () => {
   const cur = ref(-1  )
-  const expressions = reactive<Expression[]>([])
 
-  const previousExpression = ref(unitExpr())
+  let dirty = 0
 
-  const expression = computed(() => {
-    return expressions[cur.value] ?? unitExpr()
-  })
+  const expressions: Expression[] = []
 
   const addExpression = (expression: string) => {
-    expressions.push(new Expression(expression))
-    cur.value = expressions.length-1
+    expressions.unshift(new Expression(expression))
+    cur.value = 0
   }
 
   const removeExpression = (index: number) => {
     expressions.splice(index, 1)
-    if(cur.value >= expressions.length) {
-      cur.value = expressions.length - 1
+    // move the cursor back if we remove an expression occuring after or remove the cursor, as it now points to the wrong place.
+    if(cur.value >= index) {
+      cur.value = cur.value-1
+    }
+    if (dirty >= index) {
+      dirty -= 1
     }
   }
 
-  const updateCur = (index: number) => {
-    cur.value = index
+  const markDirty = (index: number) => {
+    if (index > dirty && index >= 0 && index < expressions.length) {
+      dirty = index
+    }
   }
 
   const evaluateExpr = () => {
-    try {
-      expressions[cur.value].evaluate(previousExpression.value)
-      previousExpression.value = expressions[cur.value]
-    } catch (e) {
-      if (e instanceof Error) {
-        expressions[cur.value].res = e.message
+    let failed = false
+    while(dirty > -1) {
+      if(failed) {
+        expressions[dirty].res = 'dependent expression might have an error'
+        dirty -= 1
+        continue
       }
+      try {
+        expressions[dirty].evaluate(dirty > 0 ? expressions[dirty-1] : unitExpr())
+      } catch (e) {
+        if (e instanceof Error) {
+          expressions[dirty.value].res = e.message
+          failed = true
+        }
+      }
+      dirty -= 1
     }
   }
 
   return {
     addExpression,
-    cur,
     evaluateExpr,
-    expression,
     expressions,
-    previousExpression,
+    markDirty,
     removeExpression,
-    updateCur,
   }
 })
