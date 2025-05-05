@@ -1,22 +1,19 @@
 <script setup lang="ts">
-import { ref } from 'vue'
 import ExpressionsList from '../components/ExpressionsList.vue'
-import CalculationResult from '../components/CalculationResult.vue'
-import CalcInput from '../components/CalcInput.vue'
-import type { Expression } from '@/models/Expression'
+import Toolbar from '../components/Toolbar.vue'
+import { useExpressionsStore } from '@/stores/expressions'
 
-const inputExpression = ref('')
+const expressionsStore = useExpressionsStore()
 
-const updateInput = (expression: Expression) => {
-  inputExpression.value = expression.expression
+function handleKeypress(event: KeyboardEvent) {
+  expressionsStore.addEmptyExpression()
 }
 </script>
 
 <template>
-  <main>
-    <ExpressionsList class="expressions" @updateInput="updateInput" />
-    <CalculationResult class="result" />
-    <CalcInput class="calc-input" :value="inputExpression" />
+  <main @keyup.ctrl.m.prevent="handleKeypress" @keyup.ctrl.enter.prevent="expressionsStore.evaluateExpressions()">
+    <ExpressionsList />
+    <Toolbar />
   </main>
 </template>
 

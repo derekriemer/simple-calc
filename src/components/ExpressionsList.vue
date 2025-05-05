@@ -5,14 +5,11 @@ const expressionsStore = useExpressionsStore()
 </script>
 
 <template>
+  <div>{{ expressionsStore.getDirtyTemp }}</div>
   <div class="expressions-list">
     <ul>
-      <ExpressionCard
-        v-for="(expression, index) in expressionsStore.expressions"
-        :key="index"
-        :expression="{ expression, index }"
-        @updateInput="$emit('updateInput', $event)"
-      />
+      <ExpressionCard v-for="(expression, index) in expressionsStore.expressions" :key="index" :expression="expression"
+        :index="index" />
     </ul>
   </div>
 </template>
@@ -23,6 +20,7 @@ const expressionsStore = useExpressionsStore()
   margin: 0 auto;
   padding: 1rem;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
