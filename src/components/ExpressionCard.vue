@@ -3,6 +3,7 @@ import { defineProps, ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useExpressionsStore } from '@/stores/expressions'
 import type { Expression } from '@/models/Expression'
 
+defineEmits<{ eval: () => void }>()
 const { expression, index } = defineProps<{ expression: Expression, index: number, }>()
 const expressionsStore = useExpressionsStore()
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -47,7 +48,7 @@ onBeforeUnmount(() => {
       current: current,
     }">
       <input v-show="current" ref="inputRef" type="text" :value="expression" @blur="update"
-        placeholder="Enter expression" />
+        @keypress.enter.stop="$emit('eval')" placeholder="Enter expression" />
       <button v-show="!current" @click="expressionsStore.edit(index)" class="expression">
         {{ expression }}
       </button>

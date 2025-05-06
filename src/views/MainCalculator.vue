@@ -21,7 +21,7 @@ const evaluate = () => {
 
 <template>
   <main @keyup.ctrl="add" @keyup.ctrl.enter.prevent="evaluate">
-    <ExpressionsList />
+    <ExpressionsList @eval="evaluate" />
     <ToolBar ref="toolbar" />
   </main>
 </template>
