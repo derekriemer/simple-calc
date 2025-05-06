@@ -54,6 +54,9 @@ export const useExpressionsStore = defineStore('expressions', () => {
     }
     if (dirty >= index) {
       dirty -= 1
+    } else {
+      // Removing an expression invalidates all expressions depending on the removed expression. They must be reevaluated.
+      markDirty(index - 1)
     }
   }
 
@@ -78,7 +81,7 @@ export const useExpressionsStore = defineStore('expressions', () => {
     }
     for (let tempDirty = dirty; tempDirty <= index; tempDirty++) {
       expressions[tempDirty].dirty = true
-      expressions[tempDirty].res = ''
+      expressions[tempDirty].res = 'Dirty! Reevaluate'
     }
     dirty = index
   }
@@ -87,10 +90,11 @@ export const useExpressionsStore = defineStore('expressions', () => {
    * Evaluates all dirty expressions in sequence
    * If an expression fails, all dependent expressions are marked as failed
    */
-  const evaluateExpressions = async (): Promise<boolean> => {
+  const evaluateExpressions = async (): Promise<[boolean, boolean]> => {
     console.log('Evaluating: updating: ', updateNow)
     updateNow?.()
     console.log('updated')
+    const canAdd = expressions[0]?.expression != ''
     let failed = false
     let firstFailed = 0
     for (let tempDirty = dirty; tempDirty >= 0; tempDirty--) {
@@ -99,10 +103,21 @@ export const useExpressionsStore = defineStore('expressions', () => {
         continue
       }
       try {
-        expressions[tempDirty].evaluate(
+        const expression = expressions[tempDirty]
+        if (!expression.expression) {
+          expression.res = ''
+          failed = tempDirty != 0
+          if (failed) {
+            firstFailed = tempDirty
+          } else {
+            expression.dirty = false
+          }
+          continue
+        }
+        expression.evaluate(
           tempDirty < expressions.length - 1 ? expressions[tempDirty + 1] : unitExpr(),
         )
-        expressions[tempDirty].dirty = false
+        expression.dirty = false
       } catch (e) {
         if (e instanceof Error) {
           console.log('failed exppr eval: ', e)
@@ -114,8 +129,9 @@ export const useExpressionsStore = defineStore('expressions', () => {
         }
       }
     }
+
     dirty = failed ? 0 : firstFailed
-    return !failed
+    return [!failed, canAdd]
   }
 
   /**
@@ -140,8 +156,8 @@ export const useExpressionsStore = defineStore('expressions', () => {
     markDirty,
     registerPendingCommitResponder,
     removePendingCommitResponder,
-    getDirtyTemp: dirty,
     removeExpression,
+    tempDirty: dirty,
     update,
   }
 })
