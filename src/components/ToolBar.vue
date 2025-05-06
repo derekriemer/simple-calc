@@ -26,7 +26,7 @@ defineExpose({
 </script>
 
 <template>
-  <div role="toolbar">
+  <div role="toolbar" class="toolbar">
     <button @click="add">
       Add
     </button>

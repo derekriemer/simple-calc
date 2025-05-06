@@ -21,8 +21,8 @@ const evaluate = () => {
 
 <template>
   <main @keyup.ctrl="add" @keyup.ctrl.enter.prevent="evaluate">
-    <ExpressionsList class=" expressions" />
-    <ToolBar class="toolbar" ref="toolbar" />
+    <ExpressionsList />
+    <ToolBar ref="toolbar" />
   </main>
 </template>
 
@@ -30,17 +30,20 @@ const evaluate = () => {
 main {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(100px, 80vh) auto;
+  grid-template-rows: 1fr auto;
   gap: 1rem;
   grid-template-areas:
     'expressions'
     'toolbar';
+  height: 100%;
+  min-height: 0;
 }
 
-.expressions {
+.expressions-list {
   grid-area: expressions;
   overflow-y: auto;
   width: 100%;
+  min-height: 0;
 }
 
 .toolbar {
@@ -49,6 +52,9 @@ main {
   flex-direction: row;
   gap: 1rem;
   align-items: center;
-  /* Added for vertical centering */
+  background: white;
+  position: sticky;
+  bottom: 0;
+  z-index: 2;
 }
 </style>

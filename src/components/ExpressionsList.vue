@@ -1,13 +1,37 @@
 <script setup lang="ts">
 import { useExpressionsStore } from '@/stores/expressions'
-import { storeToRefs } from 'pinia'
 import ExpressionCard from './ExpressionCard.vue'
+import { onMounted } from 'vue'
 const expressionsStore = useExpressionsStore()
-const { tempDirty } = storeToRefs(expressionsStore)
+onMounted(() => {
+  [
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "1+_",
+    "floor(_*100)",
+    "random()",
+    "5+5",
+  ].forEach((e) => {
+    expressionsStore.addExpression(e)
+  })
+})
 </script>
 
 <template>
-  <div>{{ tempDirty }}</div>
   <div class="expressions-list">
     <ul>
       <ExpressionCard v-for="(expression, index) in expressionsStore.expressions" :key="index" :expression="expression"
@@ -18,7 +42,6 @@ const { tempDirty } = storeToRefs(expressionsStore)
 
 <style scoped>
 .expressions-list {
-  max-width: 600px;
   margin: 0 auto;
   padding: 1rem;
 }
