@@ -1,51 +1,44 @@
 <script setup lang="ts">
-import { defineProps, ref, computed, watch } from 'vue'
+import { defineProps, ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
 import { storeToRefs } from 'pinia'
 import { useExpressionsStore } from '@/stores/expressions'
 import type { Expression } from '@/models/Expression'
+
 const { expression, index } = defineProps<{ expression: Expression, index: number, }>()
 const expressionsStore = useExpressionsStore()
-const { updateNow } = storeToRefs(expressionsStore)
-
-let pendingResolve: (() => void) | null = null
-
 const inputRef = ref<HTMLInputElement | null>(null)
-watch(updateNow, (val) => {
-  if (!val) return
-  if (!current.value) {
-    return
-  }
-  const newVal = inputRef.value?.value
-  if (newVal) {
-    expressionsStore.update(index, newVal)
-  }
-  if (pendingResolve) {
-    pendingResolve()
-    pendingResolve = null
-  }
-})
+
 
 const current = computed<boolean>(() => {
   return expressionsStore.cur === index
 })
+
+// we need to watch for changes to the input ref, because if it becomes null, we don't want to keep tracking.
+// we also need to track current. If current ever becomes true for us, we need to respond to updates from the store.
+// Also, immediate=true, because if we are added to the beginning of expressions array on a new mount, we need to watch the effect if we are current.
 watch(current, (isCurrent, wasCurrent) => {
   if (isCurrent && !wasCurrent) {
-    expressionsStore.registerPendingCommitResponder(new Promise<void>((resolve) => {
-      pendingResolve = resolve;
-    }));
-  } else {
-    expressionsStore.removePendingCommitResponder()
-    pendingResolve = null
+    console.trace("Updating current to new resolver")
+    expressionsStore.registerPendingCommitResponder(update)
   }
-})
+}, { immediate: true, })
 
 const removeExpression = () => {
   expressionsStore.removeExpression(index)
 }
 
-function update(event: Event) {
-  expressionsStore.update(index, (event.target as HTMLInputElement).value)
+function update() {
+  console.trace("updating!")
+  const newVal = inputRef.value?.value
+  if (newVal) {
+    expressionsStore.update(index, newVal)
+  }
 }
+
+onBeforeUnmount(() => {
+  update()
+})
+
 </script>
 
 <template>

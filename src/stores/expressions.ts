@@ -7,32 +7,21 @@ export const useExpressionsStore = defineStore('expressions', () => {
   const cur = ref(0)
   let dirty = 0 // Index of first dirty expression
   const expressions: Expression[] = reactive([unitExpr()])
-  let whenUpdateFires: Promise<void> | null = null
-  const updateNow = ref(false)
+  let updateNow: (() => void) | null = null
 
   /**
-   * Registers a promise that represents a pending commit operation
-   * @param p Promise to register
+   * Registers a callback telling the current component to update its changes.
+   * @param cb callback to register
    */
-  function registerPendingCommitResponder(p: Promise<void>) {
-    whenUpdateFires = p
+  function registerPendingCommitResponder(cb: () => void): void {
+    updateNow = cb
   }
 
   /**
    * Removes the pending commit responder
    */
   function removePendingCommitResponder() {
-    whenUpdateFires = null
-  }
-
-  /**
-   * Waits for any pending commit operation to complete
-   */
-  async function waitForCurrentCommit() {
-    if (whenUpdateFires) {
-      await whenUpdateFires
-      whenUpdateFires = null
-    }
+    updateNow = null
   }
 
   /**
@@ -87,7 +76,6 @@ export const useExpressionsStore = defineStore('expressions', () => {
     if (index < dirty || index >= expressions.length) {
       return
     }
-    console.log(dirty)
     for (let tempDirty = dirty; tempDirty <= index; tempDirty++) {
       expressions[tempDirty].dirty = true
       expressions[tempDirty].res = ''
@@ -100,11 +88,9 @@ export const useExpressionsStore = defineStore('expressions', () => {
    * If an expression fails, all dependent expressions are marked as failed
    */
   const evaluateExpressions = async (): Promise<boolean> => {
-    updateNow.value = true
-    await waitForCurrentCommit()
-    removePendingCommitResponder()
-
-    updateNow.value = false
+    console.log('Evaluating: updating: ', updateNow)
+    updateNow?.()
+    console.log('updated')
     let failed = false
     let firstFailed = 0
     for (let tempDirty = dirty; tempDirty >= 0; tempDirty--) {
@@ -157,6 +143,5 @@ export const useExpressionsStore = defineStore('expressions', () => {
     getDirtyTemp: dirty,
     removeExpression,
     update,
-    updateNow,
   }
 })
