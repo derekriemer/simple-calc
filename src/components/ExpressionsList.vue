@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { useExpressionsStore } from '@/stores/expressions'
+import { storeToRefs } from 'pinia'
 import ExpressionCard from './ExpressionCard.vue'
 const expressionsStore = useExpressionsStore()
+const { tempDirty } = storeToRefs(expressionsStore)
 </script>
 
 <template>
-  <div>{{ expressionsStore.getDirtyTemp }}</div>
+  <div>{{ tempDirty }}</div>
   <div class="expressions-list">
     <ul>
       <ExpressionCard v-for="(expression, index) in expressionsStore.expressions" :key="index" :expression="expression"
