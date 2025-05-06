@@ -11,8 +11,10 @@ const add = () => {
 }
 
 const evaluate = async () => {
-  const success = await expressions.evaluateExpressions()
-  if (success) {
+  // automatically add a new expression if editing the first one.
+
+  const [success, canAdd] = await expressions.evaluateExpressions()
+  if (canAdd && success) {
     expressions.addEmptyExpression()
   }
 }
