@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { defineProps, ref, computed, watch, onMounted, onBeforeUnmount } from 'vue'
-import { storeToRefs } from 'pinia'
+import { defineProps, ref, computed, watch, onBeforeUnmount } from 'vue'
 import { useExpressionsStore } from '@/stores/expressions'
 import type { Expression } from '@/models/Expression'
 
