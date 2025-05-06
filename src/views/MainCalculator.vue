@@ -1,19 +1,29 @@
 <script setup lang="ts">
 import ExpressionsList from '../components/ExpressionsList.vue'
-import Toolbar from '../components/Toolbar.vue'
+import Toolbar from '@/components/ToolBar.vue'
 import { useExpressionsStore } from '@/stores/expressions'
+import { useTemplateRef } from 'vue'
 
-const expressionsStore = useExpressionsStore()
 
-function handleKeypress(event: KeyboardEvent) {
-  expressionsStore.addEmptyExpression()
+const toolbarRef = useTemplateRef("toolbar")
+
+function add(event: KeyboardEvent) {
+  if (event.key !== '+') {
+    return
+  }
+  event.preventDefault()
+  toolbarRef.value?.add()
+}
+
+const evaluate = () => {
+  toolbarRef.value?.evaluate()
 }
 </script>
 
 <template>
-  <main @keyup.ctrl.m.prevent="handleKeypress" @keyup.ctrl.enter.prevent="expressionsStore.evaluateExpressions()">
+  <main @keyup.ctrl="add" @keyup.ctrl.enter.prevent="evaluate">
     <ExpressionsList />
-    <Toolbar />
+    <Toolbar ref="toolbar" />
   </main>
 </template>
 
