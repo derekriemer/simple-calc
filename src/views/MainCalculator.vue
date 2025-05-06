@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import ExpressionsList from '../components/ExpressionsList.vue'
-import Toolbar from '@/components/ToolBar.vue'
-import { useExpressionsStore } from '@/stores/expressions'
+import ToolBar from '@/components/ToolBar.vue'
 import { useTemplateRef } from 'vue'
 
 
@@ -22,8 +21,8 @@ const evaluate = () => {
 
 <template>
   <main @keyup.ctrl="add" @keyup.ctrl.enter.prevent="evaluate">
-    <ExpressionsList />
-    <Toolbar ref="toolbar" />
+    <ExpressionsList class=" expressions" />
+    <ToolBar class="toolbar" ref="toolbar" />
   </main>
 </template>
 
@@ -31,12 +30,11 @@ const evaluate = () => {
 main {
   display: grid;
   grid-template-columns: 1fr;
-  grid-template-rows: minmax(100px, 50vh) auto auto;
+  grid-template-rows: minmax(100px, 80vh) auto;
   gap: 1rem;
   grid-template-areas:
     'expressions'
-    'result'
-    'input';
+    'toolbar';
 }
 
 .expressions {
@@ -45,21 +43,12 @@ main {
   width: 100%;
 }
 
-.result {
-  grid-area: result;
-}
-
-.calc-input {
-  grid-area: input;
-}
-
-@media (min-width: 768px) {
-  main {
-    grid-template-columns: 1fr 2fr;
-    grid-template-rows: auto auto;
-    grid-template-areas:
-      'expressions result'
-      'expressions input';
-  }
+.toolbar {
+  grid-area: toolbar;
+  display: flex;
+  flex-direction: row;
+  gap: 1rem;
+  align-items: center;
+  /* Added for vertical centering */
 }
 </style>
